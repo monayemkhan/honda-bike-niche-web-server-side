@@ -21,6 +21,7 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.we5az.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
+// verify token
 async function verifyToken(req, res, next) {
     if (req.headers?.authorization?.startsWith('Bearer ')) {
         const token = req.headers.authorization.split(' ')[1];
@@ -32,16 +33,17 @@ async function verifyToken(req, res, next) {
         catch {
 
         }
-
     }
     next();
 }
-// create database collection
+
+// all API
 async function run() {
     try {
         await client.connect();
         const database = client.db("HondaBike");
 
+        // create database collection
         const BikeCollection = database.collection("bikes");
         const ReviewCollection = database.collection("reviews");
         const OrdersCollection = database.collection("orders")
@@ -86,15 +88,14 @@ async function run() {
             res.json(singleBike);
         });
 
-        // add oder
+        // post add oder API
         app.post("/addOrder", async (req, res) => {
             console.log(req.body);
             const result = await OrdersCollection.insertOne(req.body);
             res.send(result);
         });
 
-
-        // get order
+        // get order API
         app.get("/orders", async (req, res) => {
             const result = await OrdersCollection.find({}).toArray();
             res.send(result);
@@ -144,7 +145,6 @@ async function run() {
             const result = await ReviewCollection.insertOne(reviews);
             res.json(result);
         });
-
 
         // get user API
         app.get('/users', async (req, res) => {
